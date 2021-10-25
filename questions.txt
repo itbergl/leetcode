@@ -1,5 +1,5 @@
-Validate Binary Search Tree - https://leetcode.com/problems/validate-binary-search-tree/
-Sum of Two Integers - https://leetcode.com/problems/sum-of-two-integers/
+    Validate Binary Search Tree - https://leetcode.com/problems/validate-binary-search-tree/
+    Sum of Two Integers - https://leetcode.com/problems/sum-of-two-integers/
 Two Sum - https://leetcode.com/problems/two-sum/
 Merge K Sorted Lists - https://leetcode.com/problems/merge-k-sorted-lists/
 Maximum Subarray - https://leetcode.com/problems/maximum-subarray/
