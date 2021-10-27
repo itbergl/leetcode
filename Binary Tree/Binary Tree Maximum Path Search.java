@@ -18,41 +18,50 @@ class Solution {
     public int maxPathSum(TreeNode root) {
         int max = -100000000;
         
-        recursive(root, max);
+        return recursive(root)[0];
     }
     
     
-    private int[] recursive(TreeNode root, int max) {
+    private int[] recursive(TreeNode root) {
         
         // set branch to 0 if nothing, else recursivly find 
         // path length
         int L = 0;
+        int L_parent = root.val -1;
         if (root.left != null) {
-            L = recursive(root.left, max);
-            
+            int[] ans = recursive(root.left);
+            L = ans[1];
+            // if (L < 0 ) L = 0;
+            L_parent = ans[0];
         }
         int R = 0;
+        int R_parent = root.val -1;
         if (root.right != null) {
-            R = recursive(root.right, max);
-            
+            int[] ans = recursive(root.right);
+            R = ans[1];
+            // if (L < 0 ) L = 0;
+            R_parent = ans[0];
         }
         
         // if node is optimal parent node of the best route
         // then update max
-        if (root.val + L + R > max) {
-            System.out.println(max);
-            max = root.val + L + R ;
-        }
+        
+        int asParent = root.val + L + R;
+        if (R_parent >= L_parent && R_parent >= asParent) asParent = R_parent;
+        else if (L_parent >= R_parent && L_parent >= asParent) asParent = L_parent;
+
         // don't consider negative branches
         if (R < 0) R = 0;
         if (L < 0) L = 0;
         
         // find path length of node as a path node
-        int ret = root.val;
-        if (R >= L && R >= root.val) ret+= R;
-        else if (L >= R && L >= root.val) ret += L;     
+        int asPath = root.val;
+        if (R >= L && R >= root.val) asPath += R;
+        else if (L >= R && L >= root.val) asPath += L;     
         
-        return ret;       
+        
+        int[] info = {asParent, asPath};
+        return info;       
       
     }
 }
