@@ -1,7 +1,7 @@
     Validate Binary Search Tree - https://leetcode.com/problems/validate-binary-search-tree/
     Sum of Two Integers - https://leetcode.com/problems/sum-of-two-integers/
-Two Sum - https://leetcode.com/problems/two-sum/
-Merge K Sorted Lists - https://leetcode.com/problems/merge-k-sorted-lists/
+    Two Sum - https://leetcode.com/problems/two-sum/
+    Merge Two Sorted Lists - https://leetcode.com/problems/merge-two-sorted-lists/
 Maximum Subarray - https://leetcode.com/problems/maximum-subarray/
 Binary Tree Maximum Path Sum - https://leetcode.com/problems/binary-tree-maximum-path-sum/
 Meeting Rooms II (Leetcode Premium) - https://leetcode.com/problems/meeting-rooms-ii/
@@ -24,7 +24,6 @@ Best Time to Buy and Sell Stock - https://leetcode.com/problems/best-time-to-buy
 Rotate Image - https://leetcode.com/problems/rotate-image/
 3Sum - https://leetcode.com/problems/3sum/
 Product of Array Except Self - https://leetcode.com/problems/product-of-array-except-self/
-Merge Two Sorted Lists - https://leetcode.com/problems/merge-two-sorted-lists/
 Encode and Decode Strings (Leetcode Premium) - https://leetcode.com/problems/encode-and-decode-strings/
 Same Tree - https://leetcode.com/problems/same-tree/
 Reverse Bits - https://leetcode.com/problems/reverse-bits/
