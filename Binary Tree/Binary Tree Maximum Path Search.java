@@ -16,52 +16,69 @@
 
 class Solution {
     public int maxPathSum(TreeNode root) {
-        int max = -100000000;
         
         return recursive(root)[0];
     }
     
-    
     private int[] recursive(TreeNode root) {
         
-        // set branch to 0 if nothing, else recursivly find 
-        // path length
-        int L = 0;
-        int L_parent = root.val -1;
+        // test if dead end
+        if (root.left == null && root.right == null) {
+            int[] ret = {root.val, root.val};
+            return ret;
+        }
+        
+        int[] L = new int[2];
         if (root.left != null) {
-            int[] ans = recursive(root.left);
-            L = ans[1];
-            // if (L < 0 ) L = 0;
-            L_parent = ans[0];
+            L = recursive(root.left);
         }
-        int R = 0;
-        int R_parent = root.val -1;
-        if (root.right != null) {
-            int[] ans = recursive(root.right);
-            R = ans[1];
-            // if (L < 0 ) L = 0;
-            R_parent = ans[0];
-        }
-        
-        // if node is optimal parent node of the best route
-        // then update max
-        
-        int asParent = root.val + L + R;
-        if (R_parent >= L_parent && R_parent >= asParent) asParent = R_parent;
-        else if (L_parent >= R_parent && L_parent >= asParent) asParent = L_parent;
 
-        // don't consider negative branches
-        if (R < 0) R = 0;
-        if (L < 0) L = 0;
+
+        int[] R = new int[2];
+        if (root.right != null) {
+            R = recursive(root.right);
+        }
+
         
-        // find path length of node as a path node
-        int asPath = root.val;
-        if (R >= L && R >= root.val) asPath += R;
-        else if (L >= R && L >= root.val) asPath += L;     
+        int L_max = L[0];
+        int L_path = L[1];
         
         
-        int[] info = {asParent, asPath};
-        return info;       
-      
+        int R_max = R[0];
+        int R_path = R[1];
+        
+        if (root.left == null) {
+            L_max = R_max;
+            L_path = 0;
+        }
+        if (root.right == null) {
+            R_max = L_max;
+            R_path = 0;
+        }
+        
+        
+        int attempt_left = root.val + L_path;
+        int attempt_right = root.val + R_path;
+        int attempt_none = root.val;
+        
+        int best = attempt_none;
+        if (attempt_left >= attempt_right && attempt_left >= attempt_none) best = attempt_left;
+        else if (attempt_right >= attempt_left && attempt_right >= attempt_none) best = attempt_right;
+        
+        int asParent = root.val + R_path + L_path;
+        
+        if (best > asParent) asParent = best;
+        
+        int prop = asParent;
+        if (L_max >= R_max && L_max >= asParent) prop = L_max;
+        else if (R_max >= L_max && R_max >= asParent) prop = R_max;
+        
+        
+        int[] ret = {prop, best};
+        
+        return ret;
     }
+    
+    
+   
 }
