@@ -751,3 +751,26 @@ def __init__(self):
             head = head[c]
         return True
 ```
+
+## 23. Valid Palindrom
+
+Process the input to only include alphanumerics and convert to lowercase. Compare two enclosing pointers until they meet in the middle.
+
+- Time O(n)
+- Space O(1)
+  
+```py
+def isPalindrome(self, s: str) -> bool:
+    aplhabet = set('abcdefghijklmnopqrstuvwxyz0123456789')
+    s = [c for c in s.lower() if c in aplhabet]
+    
+    i, j = 0, len(s)-1
+    while i <= j:
+        if s[i] != s[j]:
+            return False
+        i += 1
+        j -= 1
+    return True
+```
+
+## 24. 3Sum

@@ -20,6 +20,7 @@
     Minimum Window Substring - https://leetcode.com/problems/minimum-window-substring/
     Longest Substring Without Repeating Characters - https://leetcode.com/problems/longest-substring-without-repeating-characters/
     Implement Trie (Prefix Tree) - https://leetcode.com/problems/implement-trie-prefix-tree/
+    Valid Palindrome - https://leetcode.com/problems/valid-palindrome/
 3Sum - https://leetcode.com/problems/3sum/
 Merge Two Sorted Lists - https://leetcode.com/problems/merge-two-sorted-lists/
 Course Schedule - https://leetcode.com/problems/course-schedule/
@@ -63,7 +64,6 @@ House Robber - https://leetcode.com/problems/house-robber/
 Validate Binary Search Tree - https://leetcode.com/problems/validate-binary-search-tree/
 Contains Duplicate - https://leetcode.com/problems/contains-duplicate/
 Find Minimum in Rotated Sorted Array - https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
-Valid Palindrome - https://leetcode.com/problems/valid-palindrome/
 Number of 1 Bits - https://leetcode.com/problems/number-of-1-bits/
 Serialize and Deserialize Binary Tree - https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
 
