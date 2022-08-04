@@ -19,9 +19,9 @@
     Reverse Bits - https://leetcode.com/problems/reverse-bits/
     Minimum Window Substring - https://leetcode.com/problems/minimum-window-substring/
     Longest Substring Without Repeating Characters - https://leetcode.com/problems/longest-substring-without-repeating-characters/
+    Implement Trie (Prefix Tree) - https://leetcode.com/problems/implement-trie-prefix-tree/
 3Sum - https://leetcode.com/problems/3sum/
 Merge Two Sorted Lists - https://leetcode.com/problems/merge-two-sorted-lists/
-Implement Trie (Prefix Tree) - https://leetcode.com/problems/implement-trie-prefix-tree/
 Course Schedule - https://leetcode.com/problems/course-schedule/
 Number of Islands - https://leetcode.com/problems/number-of-islands/
 Longest Common Subsequence -

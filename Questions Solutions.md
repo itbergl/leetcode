@@ -1,6 +1,6 @@
 #Amazon Interview Questions
 
-## Valid Parentheses
+## 1. Valid Parentheses
 
 Solution is to use a stack and add to it when we open a bracket, and remove
 the top when it matches a close bracket. If the stack is empty, we have a valid
@@ -34,7 +34,7 @@ def isValid(self, s: str) -> bool:
     return len(stack) == 0
 ```
 
-## Spiral Matrix
+## 2. Spiral Matrix
 
 Use a direction vector that will rotate clockwise (y,x) -> (x,-y) when it is out of bounds or it will visit a marked cell. When the return array has enough elements, return the result.
 - Time O(n*m)
@@ -74,7 +74,7 @@ def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
     return ret
 ```
 
-## Valid Anagram
+## 3. Valid Anagram
 
 Create a dictionary of frequencies of each letter in one of the words. Iterate through the second, subtracting from the frequency dictionary. After, if the dictionary contains any non 0 frequency then there is no valid anagram.
 
@@ -102,7 +102,7 @@ def isAnagram(self, s: str, t: str) -> bool:
     return True
 ```
 
-## Set Matrix Zeroes
+## 4. Set Matrix Zeroes
 
 Iterate through each cell and if it is a 0, then add colum and row to a list. Remove duplicates from the lists after by casting to a set. For each row, replace with a fixed length array of 0's, for each column, replace each first entry with 0's.
 
@@ -135,7 +135,7 @@ def setZeroes(self, matrix: List[List[int]]) -> None:
     return matrix
 ```
 
-## Lowest Common Anscestor of BST
+## 5. Lowest Common Anscestor of BST
 
 Do a binary search on the BST until you find a value that is between smallest number and largest number. Keep iterating, aiming for not a value but the range.
 
@@ -162,7 +162,7 @@ def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -
     return self.dfs(root, min(p.val,q.val), max(p.val, q.val))
 ```
 
-## Construct Binary Tree From preorder and inorder traversal
+## 6. Construct Binary Tree From preorder and inorder traversal
 
 Recursively pop leftmost element from preorder, as we know that will be the topmost head. Find the index in inorder of the popped element (optimised as a hashmap). We can split the inorder into a left tree (before index) and a right tree (after index). If there are elements in the left tree, they will appear before the right children in the preorder list so we can pop from the left again and use the left subtree recursively. 
 
@@ -196,7 +196,7 @@ def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNod
     return root
 ```
 
-## Counting Bits
+## 7. Counting Bits
 
 To do in nlogn time, we could either keep a complicated datastructure that keeps track of each power of two column, or decompose each element into its powers of two. To do in O(n) time in a single pass we can find our largest power of two found so far, knowing the solution is 1 for this number, and finding the difference between the subsequent numbers. This difference will already be cached so we can simply add the solutions. We know that the subsequent numbers are equal to the previous numbers but with an additional 1 at the front so we can just append the differnce that is already cached + 1.
 
@@ -222,7 +222,7 @@ def countBits(self, n: int) -> List[int]:
         
 ```
 
-## Two Sum
+## 8. Two Sum
 
 Keep a list of elements that we need to find, when we come across a number. For example if the target is 5 and we find 3, store 2 and the index. If our element is not beening looked for add its pair to the list and continue.
 - Time O(n)
@@ -241,7 +241,7 @@ def twoSum(self, nums: List[int], target: int) -> List[int]:
     return
 ```
 
-## Non-overlapping Intervals
+## 9. Non-overlapping Intervals
 
 Firstly, we note that the first interval that ends first must be included in the solution. If we consider any comnbination of intervals that could be the optimal answer (maximum intervals included) we could always either add on the first ending interval, or replace the current first interval with it as worse case it would be a one for one replacement. So we sort the intervals by ending time, and keep track of the previous end. We iterate through the sorted intervals, if it is non overlapping we don't include, otherwise increment a counter. We then return the number of total intervals minus this count.
 - Time O(nlogn + n), nlogn for sort, n for iterating intervals
@@ -266,7 +266,7 @@ def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
     return len(intervals)-count
 ```
 
-## Best Time to buy and sell stock
+## 10. Best Time to buy and sell stock
 
 My solution is as follows: iterate through the array forward, keeping track of the smallest value seen so far, and at each stage calculating the profit and updating max profit appropriately.
 - Time O(n)
@@ -305,7 +305,7 @@ def maxProfit(self,prices):
     return max_profit
 ```
 
-## Climbing Stairs
+## 11. Climbing Stairs
 
 With DP, we can build an array of size n where the ith entry is the solution for n=i. To find the solution for n=n+2, we can add n and n+1 as there is one way to get to n+2 from n and one way from n+1 in one step. A further optimisation is that we only care about the last two elements so we can just use a sliding window of size 2.
 Time - O(n)
@@ -327,7 +327,7 @@ def climbStairs(self, n: int) -> int:
     return window[1]
 ```
 
-## Binary Tree Level Order Traversal
+## 12. Binary Tree Level Order Traversal
 
 I had originally tried to be too clever and put a hashmap where it had no buisiness being. I knew to do a BFS as this is exactly a level order traversal. I had a hashmap of levels to elements, with the queue of the BFS including an incremented level variable as a two tuple with the node. Then I used a list comprehension to append these lists. This was very slow (beat 5% by time).
 
@@ -363,7 +363,7 @@ def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
     return levels
 ```
 
-## Pacific Atlantic Water Flow
+## 13. Pacific Atlantic Water Flow
 
 My solution, which I think is very readable and runs in the same time, is to do a DFS from the inner corner of each ocean, finding a set of all possible paths. Then we just find the common elements, which can be done with sets intersection.
 - Time O(n*m)
@@ -389,7 +389,7 @@ def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
     return list(p_seen & a_seen)
 ```
 
-## Longest Consecutive Sequence
+## 14. Longest Consecutive Sequence
 
 This one was annoying. First I constructed a mapping of every element index to the index of the number below it (if present). Next I iterated through that graph, and when I hit the bottom of a sequence I remembered the depth. When I did further iterating and hit an already seen sequence head I would add the solutions and store in max.
 
@@ -452,7 +452,7 @@ for num in num_set:
 return longest_streak
 ```
 
-## Reverse Linked List
+## 15. Reverse Linked List
 
 Keep two variables, and attach the front to behind and increment
 - Time O(n)
@@ -472,7 +472,7 @@ def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
     return a
 ```
 
-## Reorder List
+## 16. Reorder List
 
 Another frustrating one. One solution was to make a deque of all the elements in order, and then swap between popping from the left and then right. Another solution that I implemented below is to find the middle and use a complicated recursive function that makes a swap and returns the right outer node.
 - Time O(n)
@@ -556,7 +556,7 @@ The solution I was "meant" to see involves splitting the list down the middle an
 
 
 
-## Longest Repeating Character Replacement
+## 17. Longest Repeating Character Replacement
 
 I hated this one so much. I tried doing a two pointer type thing, which was close but no cigar. The actual solution is to keep a frequency map of the elements within the window, and find the max frequency to obtain how many characters need to be changed to fit the window. Based on this you can grow or shrink the window. Also, because we only care when we get a new max frequency, we can just keep track of that.
 - Time O(n)
@@ -584,7 +584,7 @@ def characterReplacement(self, s: str, k: int) -> int:
     return ans  
 ```
 
-## Binary Tree Maximum Path Sum
+## 18. Binary Tree Maximum Path Sum
 
 I think I have done this one before. Basically you use a recursive function that returns the maximum path that has the input node as a root, which is easy enough at the bottom of the tree. Every time you return the best tree. Along the way you can compare what the combination of the left and right paths would be and update a global variable. 
 - Time O(n)
@@ -615,7 +615,7 @@ def maxPathSum(self, root: Optional[TreeNode]) -> int:
     return ans[0]
 ```
 
-## Reverse Bits
+## 19. Reverse Bits
 
 This is something I'm not at all familiar with. The solution is to iterate 32 times, each time pushing the answer right by one bit, exposing a new bit on the right, and add the right bit of the input number (by bitwise AND). Then we shift the input right one bit to get the next bit.
 - Time O(1)
@@ -633,7 +633,7 @@ def reverseBits(self, n: int) -> int:
     return ans
 ```
 
-## Minimum Window Substring
+## 20. Minimum Window Substring
 
 This question is the bane of my existance. The solution is to keep a frequency counter of t, and subtract from it whenever the window meets a character in t. When the frequencies are positive, this means we haven't found our first match, so decrement a counter of size len(t) until it reaches 0 at which point we have our first match. 
 
@@ -677,7 +677,7 @@ def minWindow(self, s: str, t: str) -> str:
     return best
 ```
 
-## Longest Substring Without Repeating Characters
+## 21. Longest Substring Without Repeating Characters
 
 Keep a dictionary of the last time we've encountered this character. If it is in our current window when we find it again then swap the start of the window to just after it. When we update the right pointer, record the last seen index for the current character and update the max value.
 - Time O(n)
@@ -703,4 +703,51 @@ def lengthOfLongestSubstring(self, s: str) -> int:
     return best
 ```
 
-##
+## 22. Implement Trie
+
+Insert - for each character, place in the dictionary and progress the tree with a new dictionary if there is no key.
+Search - for each charactter, iterate the trie and see if the end of word character exists
+Prefix - same as search but don't check end-of-word character
+
+Insert
+- Time O(n)
+- Space O(n)
+
+Search
+- Time O(n)
+- Space O(1)
+
+Prefix
+- Time O(n)
+- Space O(1)
+
+```py
+def __init__(self):
+        self.root = {}
+
+    def insert(self, word: str) -> None:
+        
+        head = self.root
+        for c in word:
+            head[c] = head.get(c, {})
+            head = head[c]
+        head['.'] = ''
+           
+
+    def search(self, word: str) -> bool:
+        head = self.root
+        for c in word:
+            if c not in head:
+                return False
+            head = head[c]
+        return '.' in head
+            
+            
+    def startsWith(self, prefix: str) -> bool:
+        head = self.root
+        for c in prefix:
+            if c not in head:
+                return False
+            head = head[c]
+        return True
+```
