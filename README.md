@@ -774,3 +774,227 @@ def isPalindrome(self, s: str) -> bool:
 ```
 
 ## 24. 3Sum
+
+## 25. Merge Two Sorted Lists
+
+Create a bottom and top pointer, where the bottom is where we are inserting into and is initially a smaller value than the top. Keep iterating until the next node is bigger than the top pointer and then make the switch.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+
+    if not list1:
+        return list2
+
+    if not list2:
+        return list1
+
+
+    top = list1
+    bottom = list2
+    if list1.val < list2.val:
+        top = list2
+        bottom = list1
+
+    head = bottom
+
+    while top:
+
+        if not bottom.next:
+            bottom.next = top
+            break
+
+        if bottom.next.val < top.val:
+            bottom = bottom.next
+        else:
+            bottom.next, top.next, top = top, bottom.next, top.next
+            bottom = bottom.next
+
+    return head
+```
+
+## 26. Course Scheduling 
+
+Do a DFS (topological sort) on a directed graph of course dependencies. Keep a set of nodes in the current path and a set of explored nodes. If a node in the dfs is in the path already, return True for the presenence of a cycle. If it is already explored then we can ignore it.
+
+- Time O(n)
+- Space O(n)
+
+```py
+def dfs(self, node, adj_list, explored, path):
+
+    if node in path:
+        return True
+
+    path.add(node)
+
+    for neighbour in adj_list.get(node, []):
+        if neighbour in explored:
+            continue 
+        if self.dfs(neighbour, adj_list, explored, path):
+            return True
+
+    explored.add(node)
+    path.remove(node)
+    return False
+
+
+def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+
+    adj_list = {}
+
+    for p in prerequisites:
+
+        adj_list[p[1]] = adj_list.get(p[1], []) + [p[0]]
+
+    path = set()
+    explored = set()
+
+    for node in adj_list:
+        if self.dfs(node, adj_list, explored, path):
+            return False
+
+    return True
+```
+
+## 27. Number of Islands
+
+My solution was to simply edit the matrix inplace and do a dfs at each node. The number of dfs calls is the number of islands:
+- Time O(n*m)
+- Space O(1)
+
+```py
+def dfs(self, r, c, grid):
+
+
+    grid[r][c] = '2'
+    for dr, dc in [(0,1), (0,-1), (-1,0), (1,0)]:
+        if 0<=r+dr<len(grid) and 0<=c+dc<len(grid[0]):
+            if grid[r+dr][c+dc] == '1':
+                self.dfs(r+dr, c+dc, grid)
+
+
+
+def numIslands(self, grid: List[List[str]]) -> int:
+    count = 0
+    for r in range(len(grid)):
+        for c in range(len(grid[0])):
+
+            if grid[r][c] =='1':
+                count += 1
+                self.dfs(r,c,grid)
+    return count
+```
+
+## 28. 
+
+## 29. Rotate Image
+
+Flip along the line r=c and then the line c = mid, where mid is the midpoint of n.
+
+- Time O(n^2)
+- Space O(1)
+
+```py
+def rotate(self, matrix: List[List[int]]) -> None:
+    """
+    Do not return anything, modify matrix in-place instead.
+    """
+
+    n = len(matrix)
+    # reflect along r = c
+
+    for r in range(n):
+        for c in range(r, n):
+            matrix[r][c], matrix[c][r] = matrix[c][r], matrix[r][c]
+
+
+    # reflect along c = mid
+
+    for r in range(n):
+        for c in range(n//2):
+            matrix[r][c], matrix[r][n-c-1] = matrix[r][n-c-1], matrix[r][c]
+```
+
+## 31. Merge K Sorted Lists
+
+I have ommitted the code for merge 2 sorted lists as I have already solved that problem. This problem uses that solution and basically merges the lists together heirachically. I'm sure there are optimisations to be made (such as optimally merging the lists to keep equal sizes), but this solution if fine. 
+- Time O(n*average_list_length)
+- Space O(n)
+
+```py
+def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+
+    k = len(lists)
+
+    if k == 0:
+        return None
+    if k == 1:
+        return lists[0]
+
+    while len(lists) > 1:
+
+        lists = [lists[i] if i==len(lists)-1 else self.merge2Lists(lists[i], lists[i+1]) for i in range(0, len(lists), 2)]
+        # swap to ensure last element isn't always ignored
+        lists[0], lists[-1] = lists[-1], lists[0]
+
+
+    return lists[0]
+```
+
+## 32. Word Break
+
+My solution was to use a dfs with caching. 
+- Time O(n)
+- Space O(n)
+
+```py
+def dfs(self, wordDict, s, i, seen):
+
+    if i == len(s):
+        return True
+
+    for w in wordDict:
+
+        if s.startswith(w, i) and not i in seen:
+
+            if self.dfs(wordDict, s, i+len(w), seen):
+                return True
+            if i+len(w)==len(s):
+                return True
+
+    seen.add(i) 
+    return False
+
+
+def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+
+    seen = set()
+
+    return self.dfs(wordDict, s, 0, seen)
+```
+
+However, top-down memoisation could also be used:
+- Time O(n)
+- Space O(n)
+
+```py
+def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+
+    memo = [False]*(1+len(s))
+    memo[0] = True
+
+    for i in range(1, len(s)+1):
+
+        for w in wordDict:
+
+            if i >= len(w) and s[i-len(w):i] == w:
+
+                if memo[i]:
+                    continue
+                memo[i] = memo[i-len(w)]
+
+    return memo[-1]
+```
