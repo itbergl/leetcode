@@ -888,8 +888,63 @@ def numIslands(self, grid: List[List[str]]) -> int:
     return count
 ```
 
-## 28. 
+## 28. Longest Common Subsequence
 
+This has got to be the hardest problem I have done. I simply do not understand dynamic programming. I had tried solving with cached DFS, which took too long. 
+
+The solution is from the 2-DP relation with DP(a,b) being the solution for the subproblem with strings A\[:a\] and B\[:b\]. 
+
+- If we consider DP(a+1, b+1), the solution will be 1+DP(a,b) if A\[a+1\] == B\[b+1\]. We can introduce this as a rule. 
+- If we consider DP(a+1, b+1), and A\[a+1\] != B\[b+1\], the solution will the max of the solutions before we added a new character: ``max(DP(a-1, b), DP(a, b-1)``. Simply, because adding the end characters does not create a better solution, we know the best possible solution will be equivalent to the best solution found so far, which is non-decreasing. That solution was either found when we neglected either of the end characters on both strings.
+
+- Time O($n*m$)
+- Space O($n*m$)
+
+```py
+def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+    
+    dp = [[0 for _ in range(len(text1) + 1)] for _ in range(len(text2)+1)]
+    
+    for i in range(1, len(text1)+1):
+        
+        for j in range(1, len(text2)+1):
+            topleft = dp[j-1][i-1]
+              
+            if text1[i-1] == text2[j-1]:
+                dp[j][i] = topleft + 1
+                continue
+
+            up, left = dp[j][i-1], dp[j-1][i]
+            dp[j][i] = max(up, left)
+
+    return dp[-1][-1]        
+```
+
+An obvious optimisation is to only use 2 rows of space, and index by modulo or otherwise.
+
+- Time O($n*m$)
+- Space O($n$)
+
+```py
+def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+    
+    dp = [[0 for _ in range(len(text1) + 1)] for _ in range(2)] 
+         
+    for i in range(1, len(text2)+1):  
+        for j in range(1, len(text1)+1):
+            
+            up = dp[(i+1) & 1][j]
+            left = dp[i & 1][j-1]
+            topleft = dp[(i+1)& 1][j-1]
+            
+            if text2[i-1] == text1[j-1]:
+                dp[i& 1][j] = topleft + 1
+            elif up >= left:
+                dp[i& 1][j] = up
+            else:
+                dp[i& 1][j] = left
+    return dp[len(text2)& 1][-1]
+```
 ## 29. Rotate Image
 
 Flip along the line r=c and then the line c = mid, where mid is the midpoint of n.
@@ -997,4 +1052,212 @@ def wordBreak(self, s: str, wordDict: List[str]) -> bool:
                 memo[i] = memo[i-len(w)]
 
     return memo[-1]
+```
+
+## 33. Combination Sum
+
+A basic solution for this that holds up pretty well in regards to time and space complexity is to do a simple DFS with caching.
+
+- Time O(n Choose n/N)?
+- Space O(n Choose n/N)?
+
+```py
+def dfs(self, path, candidates, target, solutions, seen):
+        
+        path_tuple = tuple(sorted(path))
+        if (target, path_tuple) in seen:
+            return
+        
+        seen.add((target, path_tuple))
+        
+        for c in candidates:
+            
+            if target -c == 0:
+                solutions.add(tuple(sorted(path + [c])))
+                continue
+            
+            if target-c < 0:
+                continue
+                
+            self.dfs(path + [c], candidates, target-c, solutions, seen)
+        
+        
+    
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        
+        ret = set()
+        seen = set()
+        self.dfs([], candidates, target, ret, seen)
+        return list(ret)     
+```
+
+
+## 34. Unique Paths
+
+To solve this problem, you can do 2D dynamic programming.
+
+- Time O(n*m)
+- Space O(n*m)
+
+```py
+def uniquePaths(self, m: int, n: int) -> int:
+    
+    dp = [[1]*m for _ in range(n)]
+    
+    for l in range(m):
+        for d in range(n):
+            top = dp[d-1][l] if d > 0 else 0
+            left = dp[d][l-1] if l > 0 else 0
+            dp[d][l] = top + left
+    
+    return dp[-1][-1]
+```
+
+However, since we are only looking at one row of the 2D array at a time, we can do this in O(n) space
+
+- Time O(n*m)
+- Space O(n)
+
+```py
+def uniquePaths(self, m: int, n: int) -> int:
+    
+    dp = [1]*n
+    for _, j in product(range(1, m), range(1, n)):
+        dp[j] += dp[j-1]
+    return dp[-1]
+```
+
+## 35. Decode Ways
+
+DP solution. Create an array of size n that denotes, at i, the solution for the substring s\[:i\]. After checking that the first element isn't 0, we know the first solution is 1. Start indexing from the second element, and if that element isn't 0 our next solution will be the previous one. If, additionally, the previous two elements are less than 27 and greater than 9 we should add those paths.
+
+- Time O(n)
+- Space O(n)
+
+And to reduce memory usage, have a sliding window of size two.
+
+- Time O(n)
+- Space O(1)
+  
+```py
+def numDecodings(self, s: str) -> int:
+    
+    
+    if int(s[0]) == 0:
+        return 0
+    
+    dp = (1,1)
+    
+    
+    
+    for i, c in enumerate(s[1:], 1):
+        
+        one = int(c)
+        n = 0
+        if one != 0:
+            n += dp[1] 
+        
+        
+        two = int(s[i-1:i+1])
+
+        if two < 27 and two >= 10:
+            n += dp[0] 
+        
+        dp = (dp[1], n)
+        
+    return dp[-1]
+```
+
+## 36. Remove Nth Node From End Of List
+
+I had the right intentions for this one, but the wrong execution. Create a fast and slow pointer and increment the fast one by ``n``. Then start incrementing both until the end is reached. I had originally used a counter instead of a finite for loop, assigned head to slow only after fast had been reached and made a redundant check for edge case of a single node input but otherwise had the right idea.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+    
+    
+    fast, slow = head, head
+    for _ in range(n): 
+        fast = fast.next
+        
+    if not fast: 
+        return head.next
+    
+    while fast.next: 
+        fast, slow = fast.next, slow.next
+        
+    slow.next = slow.next.next
+    return head
+
+```
+
+## 37. Add and Search Word
+
+Implement a Trie - a tree of prefixes. Recursively search wildcards to find matches.
+
+### ``__init__()``
+- Time O(1)
+- Space O(1)
+
+## ``addWord(word)``
+
+- Time O(len(word))
+- Space O(len(word))
+
+
+## ``search(word)``
+
+- Time O(26^w), where w is the number of wildcards and 26 is the number of letters in the alphabet
+- Space O(1)
+
+```py
+def __init__(self):
+    self.trie = dict()
+
+def addWord(self, word: str) -> None:
+    
+    head = self.trie
+    for c in word:
+        if c not in head:
+            head[c] = dict()
+        head = head[c]
+    head['_'] = dict()
+    
+def search_dfs(self, word, trie):
+    if not word:
+        return '_' in trie
+    
+    for i, c in enumerate(word):
+        if c == '.':
+            return any(self.search_dfs(word[i+1:], trie[g]) for g in trie)  
+        elif c not in trie:
+            return False
+        trie = trie[c]
+    return '_' in trie
+        
+def search(self, word: str) -> bool:
+    return self.search_dfs(word, self.trie)
+```
+
+## Invert/Flip Binary Tree
+
+Classic
+
+- Time O(n)
+- Space O(n) (callstack)
+
+```py
+def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+    
+    if not root:
+        return root
+    
+    self.invertTree(root.left)
+    self.invertTree(root.right)
+    
+    root.left, root.right = root.right, root.left
+    return root
 ```
