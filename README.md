@@ -1178,7 +1178,6 @@ I had the right intentions for this one, but the wrong execution. Create a fast 
 ```py
 def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
     
-    
     fast, slow = head, head
     for _ in range(n): 
         fast = fast.next
@@ -1191,7 +1190,6 @@ def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNod
         
     slow.next = slow.next.next
     return head
-
 ```
 
 ## 37. Add and Search Word
@@ -1242,7 +1240,7 @@ def search(self, word: str) -> bool:
     return self.search_dfs(word, self.trie)
 ```
 
-## Invert/Flip Binary Tree
+## 38. Invert/Flip Binary Tree
 
 Classic
 
@@ -1261,3 +1259,288 @@ def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
     root.left, root.right = root.right, root.left
     return root
 ```
+
+## 39. Product of Array Except Self
+
+Keep an array of the product to the left at each index. Keep an array of the product to the right at each index. Interate through and append to an array.
+
+Instead of appending to an array for the output, multiply in-place while constructing the "to-the-right" array:
+
+- Time O(2n)
+- Space O(2n)
+
+```py
+def productExceptSelf(self, nums: List[int]) -> List[int]:
+    
+    ret, left = [], []
+    last = 1
+    for i, n in enumerate(nums):
+        left.append(last)
+        ret.append(last)
+        last = n*last
+        
+    last = 1
+    for i, n in enumerate(nums[::-1]):
+        ret[-(i+1)] *= last
+        last = n*last
+    
+    return ret
+```
+
+More concisely, you can modify the "to-the-left" array in-place for O(n) space, but it looks uglier.
+
+- Time O(2n)
+- Space O(n)
+  
+```py
+def productExceptSelf(self, nums: List[int]) -> List[int]: 
+    ret = [1]
+    for n in nums[:-1]:
+        ret.append(ret[-1]*n)
+    
+    temp = 1
+    for i, n in enumerate(nums[::-1]):
+        ret[-(i+1)] *= temp
+        temp *= n
+    return ret     
+```
+
+## 40. Maximum Subarray
+
+Iterate through the array and add the running total. If the total becomes negative, it is a useless prefix and we can set the total to 0. At every iteration we update the maximum.
+
+- Time O(n)
+- Space O(1)
+```py
+def maxSubArray(self, nums: List[int]) -> int:
+    total, max_val = 0, float('-inf')
+
+    for n in nums:          
+        attempt = total + n
+        if attempt > max_val:
+            max_val = attempt
+        
+        if attempt < 0:
+            total = 0
+        
+        else:
+            total += n
+
+    return max_val
+```
+
+## 41. Coin Change
+
+Make array of length amount+1, where the index represents the solution for amount = index. At each index consider each coin denomination and look ahead to that solution. Replace the value with the min of itself and the current index + 1. 
+
+- Time O(n)
+- Space O(n)
+
+```py
+def coinChange(self, coins: List[int], amount: int) -> int:
+    
+    dp = [amount+1]*(amount+1)
+    dp[0] = 0
+    
+    for a in range(amount):          
+        for c in coins:
+            if a+c <= amount and dp[a]+1 < dp[a+c]:
+                dp[a+c] = dp[a]+1
+    
+    return dp[-1] if dp[-1] != amount+1 else -1
+```
+
+## 42. Kth Smallest Element in a BST 
+
+### Iterative Solution
+
+Keep a stack of the sorted traversal by walking down the left tree, until you hit null. Subtract one from k and if its 0 then you have an answer, else point to the right node. If you don't have a left path to traverse then the stack will have the next smallest value at the top.
+
+- Time O(n)
+- Space O(log(n))
+```py
+def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+    
+    stack = deque()
+    curr = root
+    
+    while curr or stack:
+        
+        while curr:
+            stack.append(curr)
+            curr = curr.left
+        curr = stack.pop()
+        k -= 1
+        
+        if k == 0:
+            return curr.val
+        
+        curr = curr.right
+```
+
+### Recursive Solution
+
+Search left tree, and if it is null return -1. If the left tree is -1 then subtract 1 from the global counter. If the counter is 0 then the node itself is the return value, but if not return the answer from the right tree.
+
+- Time O(n)
+- Space O(log(n))
+
+```py
+class Solution:
+    def dfs(self, node):
+            
+        if not node:
+            return -1
+
+        left = self.dfs(node.left)
+
+        if left != -1:
+            return left
+
+        self.k -= 1
+
+        if self.k == 0:
+            return node.val
+
+        return self.dfs(node.right)
+    
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        self.k = k
+        return self.dfs(root)
+```
+
+To improve, include number of left children in each node.
+
+## 43. Missing Number
+
+### Math Solution
+
+Since we are missing exactly one number, then we could take the sum of all the numbers there should be, subtract the numbers that are there.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def missingNumber(self, nums: List[int]) -> int:
+    
+    return int((len(nums) * (len(nums) + 1) )/ 2 -  sum(nums))
+```
+
+## Loop Solution
+
+Sort the array and go through until one of the values isn't one greater than the previous value.
+- Time O(nlogn)
+- Space O(1)
+
+```py
+def missingNumber(self, nums: List[int]) -> int:
+    
+    nums.sort()
+    last = -1
+    for n in nums:
+        if last +1 != n:
+            return last + 1
+        last += 1
+        
+    return len(nums)
+```
+
+## 44. Container with most water
+
+Keep a left and right pointer, and increment the limiting one (smaller one) towards the middle until it isn't the smallest. Keep track of the maximum area calculated. This works because if we are investigating a limiting side and non-limiting side, moving the non-limiting side will never make a greater result, so we should only be moving the limiting side.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def maxArea(self, height: List[int]) -> int:
+    
+    l, r = 0, len(height)-1
+    
+    ret = -1
+    
+    while l < r:
+        
+        if height[l] < height[r]:
+            ret = max(ret, (r-l)*height[l])
+            l += 1
+            
+        else:
+            ret = max(ret, (r-l)*height[r])
+            r -= 1        
+        
+    return ret
+```
+
+## 46. Clone Graph
+
+Keep a map of old to new nodes, and use the keyset as a set of visited noded. When there are no more neighbours to search you can fill in the properties of the node.
+
+- Time O(n)
+- Space O(n)
+
+```py
+def dfs(self, node, visited):
+
+    visited[node.val] = Node()
+    
+    for n in node.neighbors:
+        if n.val not in visited:
+            self.dfs(n, visited)
+
+    visited[node.val].val = node.val
+    visited[node.val].neighbors = [visited[n.val] for n in node.neighbors]
+            
+def cloneGraph(self, node: 'Node') -> 'Node':
+    
+    if not node:
+        return None
+    
+    visited = dict()
+    self.dfs(node, visited)
+    return visited[node.val]
+```
+
+## 58. Same Tree
+
+DFS: base case is when both are null (True), one is null (False), or their values are different (False). Else return the AND of sameTree(left) and sameTree(right).
+
+- Time O(n)
+- Sapce O(height)
+
+```py
+def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+    
+    if not p and not q:
+        return True
+    
+    if not p or not q:
+        return False
+    
+    if p.val != q.val:
+        return False
+    
+    return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
+```
+
+## 60. Maximum Depth of Binary Search Tree
+
+Do a dfs and count the depth.
+
+- Time O(n)
+- Space O(log(n))
+
+```py 
+def dfs(self, root, count):
+    if not root:
+        return count
+    
+    L = self.dfs(root.left, count+1)
+    R = self.dfs(root.right, count+1)
+    
+    return max(L, R)
+
+def maxDepth(self, root: Optional[TreeNode]) -> int: 
+    return self.dfs(root, 0)
+```
+  
