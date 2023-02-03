@@ -775,6 +775,40 @@ def isPalindrome(self, s: str) -> bool:
 
 ## 24. 3Sum
 
+Sort the list O(nlogn), and point to the left index. Make a pointer to the right and at the end. If the sum is above 0 move the right and if it is less than 0 move the left. When it is 0 save the answer. 
+
+- Time O(n^2)
+- Space O(1)
+```py
+def threeSum(self, nums):
+    # i + j + k = 0
+    ret = []
+    nums = sorted(nums)
+    prev = nums[0]
+    for i in range(len(nums[:-2])):
+            
+        if nums[i] == prev and i > 0:
+            continue
+        prev = nums[i]
+        
+        j, k = i+1, len(nums)-1
+
+        while j < k:
+
+            curr_sum = nums[j] + nums[k]
+
+            if curr_sum > -nums[i]:
+                k -= 1
+            elif curr_sum < -nums[i]:
+                j += 1
+            else:
+                ret.append([nums[i], nums[j], nums[k]])
+                found = nums[j]
+                while j < k and nums[j] == found:
+                    j += 1
+    return ret
+```
+
 ## 25. Merge Two Sorted Lists
 
 Create a bottom and top pointer, where the bottom is where we are inserting into and is initially a smaller value than the top. Keep iterating until the next node is bigger than the top pointer and then make the switch.
@@ -1472,6 +1506,72 @@ def maxArea(self, height: List[int]) -> int:
     return ret
 ```
 
+## 45. Maximum Product Subarray
+
+My solution to this problem came from the observation that the solution will be 
+  A) A subarray between either the end points or 0s
+  B) 0 itself
+
+For A, if a bounded subarray is positive, it can be proposed as a maximum, but if it is negative then you can extract a positive array by finding the side which contains the largest negative product and dividing. This negative product will be on the boundary on either the left or the right. 
+
+First I tried finding both these values for each bounded subarray, but this was messy. Instead I wrote a helper function to find the negative product of each bounded array on the left and ran it twice with the array and then the reversed array. The maximum of these is the return value. 
+
+The helper function works like so:
+- store variables for the current product, the previous product, the best value, the current first negative product and the index that the negative product was found.
+- for each number
+  - update the current product and previous product
+  - if the current product becomes negative, update the first negative product and its corresponding index. Never update again until specified.
+  - if the current product becomes 0 or we reach the end
+    - if the current product is 0 
+      - backtrack the previous product IF there is one
+      - update the best value to 0 if it is better (backtracking may find a negative value)
+    - if current product is positive or we just found the first negative product
+      - update best to current product if it is better
+    - else update best to current product / first negative product
+    - reset product and first negative variables
+
+- Time O(n^2)?
+- Space O(1)
+
+```py
+
+def maxProduct(self, nums: List[int]) -> int:
+    return max(self.one_way(nums), self.one_way(nums[::-1]))
+
+def one_way(self, nums):
+    
+    so_far, prev_so_far = None, None
+    initial, initial_index = 1, -1
+
+    best = -float('inf')
+
+    for i, n in enumerate(nums):
+        
+        so_far, prev_so_far = (so_far or 1)*n, so_far
+
+        if so_far < 0 and initial > 0:
+            initial, initial_index = so_far, i
+
+        if n == 0 or i == len(nums)-1:
+
+            if n == 0:
+                best = max(best, 0)
+
+                if prev_so_far:
+                    i -= 1
+                    so_far = prev_so_far
+
+            if so_far > 0 or initial_index == i:
+                best = max(best, so_far)
+            else:
+                best = max(best, so_far/initial)
+        
+            so_far =  None
+            initial, initial_index = 1, -1
+
+    return int(best)
+```
+
 ## 46. Clone Graph
 
 Keep a map of old to new nodes, and use the keyset as a set of visited noded. When there are no more neighbours to search you can fill in the properties of the node.
@@ -1501,6 +1601,355 @@ def cloneGraph(self, node: 'Node') -> 'Node':
     return visited[node.val]
 ```
 
+## 47. Word Search 
+
+Do a dfs on each element, modifying the array temporarily to act as a visited reference. 
+
+- Time O((mn)^2)
+- Space O(1)
+
+```py
+def dfs(self, r,c,board,word, i):
+        
+    if len(word) == i:
+        return True
+    
+    if not(0 <= r < len(board) and 0 <= c < len(board[r])):
+        return False
+    
+    if board[r][c] != word[i]:
+        return False
+
+    board[r][c] = '.'
+    ret = any([self.dfs(x, y, board, word, i+1) for x, y in [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]])
+            
+    board[r][c] = word[i]
+    
+    return ret
+    
+def exist(self, board: List[List[str]], word: str) -> bool:
+    
+    for r in range(len(board)):
+        for c in range(len(board[r])):
+            if self.dfs(r,c, board, word, 0):
+                return True
+                
+    return False
+```
+## 48. Word Search II
+
+Do a DFS starting at each index. Use a trie of the dictionary words for searching. When you find a word, delete the EOW symbol from the trie and prune after every search. To track the visisted nodes, convert letters to uppercase temporarily.
+
+- Time O(wn^2)
+- Space O(n + w)
+
+```py
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        trie = {}
+        for words in words:
+            head = trie
+            for w in words:    
+                if w not in head:
+                    head[w] = {}
+                head = head[w]
+            head['.'] = '.'
+
+        ans = []
+        for j in range(len(board)):
+            for i in range(len(board[j])):
+                if i == 1 and j == 3:
+                    print(board, trie)
+                ret = self.dfs(board, i, j, '', trie)
+                if ret:
+                    ans += ret
+
+                    self.prune(trie)
+
+        return ans
+
+    def prune(self, trie):
+
+        if not trie:
+            return True
+
+        if trie == '.':
+            return False
+
+        keys = [_ for _ in trie.keys()]
+
+        for k in keys:
+            if self.prune(trie[k]):
+                del trie[k]
+        
+        return len(trie) == 0
+                
+    def dfs(self, board, i, j, so_far, trie):
+
+        if not (0 <= i < len(board[0]) and 0 <= j < len(board)):
+            return None
+
+        L = board[j][i]
+
+        if L.isupper():
+            return None
+
+        if L not in trie:
+            return None
+
+        board[j][i] = L.upper()
+
+        words = []
+        if '.' in trie[L]:
+            del trie[L]['.']
+            words.append(so_far + L)
+        
+        for di, dj in [(1,0), (0,1), (-1,0), (0, -1)]:
+            Di, Dj = i + di, j + dj
+            ret = self.dfs(board, Di, Dj, so_far+L, trie[L])
+            if ret:
+                words += ret 
+
+        board[j][i] = L.lower() 
+
+        if len(words) == 0:
+            return None
+        return words
+```
+## 49. Merge Intervals
+
+Sort the array by start time and iterate left to right. Whenever a start date is after the current proposed end date, create the new interval and creat a new proposal. If it is conflicting, update the current proposal.
+
+- Time O(nlogn)
+- Space O(n)
+
+```py
+def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+
+    intervals.sort(key=lambda i: i[0])         
+    ans = []
+
+    SE = intervals[0]
+    for i in range(1,len(intervals)):
+
+        if intervals[i][0] <= SE[1] <= intervals[i][1]:
+            SE[1] = intervals[i][1]
+
+        elif SE[1] < intervals[i][0]:
+            ans.append(SE)
+            SE = intervals[i]
+
+    ans.append(SE)
+    return ans
+```
+
+## 50. Subtree of Another Tree
+
+Create a function to check for tree equality. At every step, check for equality then if false recursively run solution on left and right substree.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def equals(self, a, b):
+    
+    if not a and not b:
+        return True
+
+    if not a or not b:
+        return False
+
+    if a.val == b.val:
+        return self.equals(a.left, b.left) and self.equals(a.right, b.right)
+    
+    return False
+
+def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+    
+    if not root and subRoot:
+        return False
+
+    if self.equals(root, subRoot):
+        return True
+
+    return self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot)
+```
+
+## 51. Search in Rotated Sorted Array
+
+Do a binary search, but check if there's a discontinuity in the left side. If there isn't then check the target is in the bounds, and if there is then check it could be in the discontinued range. 
+
+- Time O(logn)
+- Space O(1)
+
+```py
+def search(self, nums: List[int], target: int) -> int:
+    i, j = 0, len(nums)-1
+
+    while i <= j:
+
+        mid = (i+j)//2
+        if nums[mid] == target:
+            return mid
+        
+        if (nums[i] <= target < nums[mid]) and nums[i] <= nums[mid]:
+            j = mid -1
+            continue
+        
+        if (nums[i] <= target or target < nums[mid]) and  nums[i] > nums[mid]:
+            j = mid -1
+            continue
+        
+        i = mid + 1
+
+    return -1
+```
+## 52. Jump Game
+
+Modify the array to be the index plus value. Make two cursors that define a range initially at [0,1), and find the max value. Move the range to have the left cursor at the end of the last range and right cursor to be the max. When your right cursor is at or over the end of the array return True. If the range doesn't move return False.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def canJump(self, nums: List[int]) -> bool:
+
+    nums = [num+i for i, num in enumerate(nums)]
+
+    i, j = 0, 1
+
+    while j < len(nums):
+        furthest = max(nums[i:j])
+
+        if furthest == j-1:
+            return False
+        
+        i = j
+        j = furthest + 1
+
+    return True
+```
+
+## 53. Find Median From Data Stream
+
+Keep a min heap and max heap either side of the middle two numbers. Keep the heaps balanced with the heap on the right (min heap) never being more than 1 element less than the heap on the left (max heap). When a new number is added, put it on the left if it is lessthan the min of the left heap, otherwise put in on the right. If the right heap grows too big, pop its min and add it to the left heap, and visa-versa. To find the median, take the average if the heaps are the same size, otherwise take the left max (as it is garunteed to not be smaller).
+
+- Time \[addNum\] O(log(n)) \[findMedian\] O(log(n))
+- Space O(n)
+
+```py
+    def __init__(self):
+        # max heap on the left
+        self.L = []
+        # min heap on the right
+        self.R = []
+
+    def addNum(self, num: int) -> None:
+        
+        if not self.L or num < -self.L[0]:
+            heapq.heappush(self.L, -num)
+        else:
+            heapq.heappush(self.R, num)
+        
+        if len(self.R) > len(self.L):
+            pop = heapq.heappop(self.R)
+            heapq.heappush(self.L, -pop)
+            return
+
+        if len(self.L) > len(self.R) + 1:
+            pop = heapq.heappop(self.L)
+            heapq.heappush(self.R, -pop)
+            return
+
+    def findMedian(self) -> float:
+
+        l = -self.L[0]
+
+        if self.R:
+            r =  self.R[0]
+            
+            if len(self.L) == len(self.R):
+                return (l + r)/2
+        
+        return l
+```
+## 54. Group Anagrams
+
+Keep a dictionary of all anagrams, using the sorted tuple as a key. The value is a list of words under that anagram key.
+
+- Time O(n)
+- Space O(n)
+
+```py
+def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+    
+    groups = dict()
+
+    for s in strs:
+
+        key = tuple(sorted(s))
+
+        groups[key] = groups.get(key, []) + [s]
+
+    return [_ for _ in groups.values()]
+```
+
+## 56. Palindromic Substrings
+
+Step through the indexes of the input in steps of 0.5, and get the left and right elements either side and keep adding to the total until they aren't equal.
+
+- Time O(n^2)
+- Space O(1)
+
+
+```py
+def countSubstrings(self, s: str) -> int:
+
+    substrings = 0
+    for i in range(len(s)*2):
+
+        mid = i/2
+
+        l = int(mid)
+        r = round(mid + 0.001)
+
+        while l >= 0 and r < len(s):
+
+            if s[l] != s[r]:
+                break
+            substrings += 1
+            l -= 1
+            r += 1
+
+    return substrings
+```
+
+## 57. Top K Frequent Elements
+
+Create a dictionary of frequencies and use the frequencies as a key for a max heap. Pull k elements from the heap and return.
+
+- Time O(n)
+- Space O(n)
+
+```py
+def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+    freq = dict()
+
+    for n in nums:
+        freq[n] = freq.get(n, 0) + 1
+
+    heap = [(-f, v) for v, f in freq.items()]
+    heapq.heapify(heap)
+
+    ret = list()
+
+    for i in range(k):
+        ret.append(heapq.heappop(heap)[1])
+
+    return ret
+```
+
+Alternatively, you could sort the key value pairs of the frequency map and take the top k elements. This has a complexity of ``O(n logn)``.
+
 ## 58. Same Tree
 
 DFS: base case is when both are null (True), one is null (False), or their values are different (False). Else return the AND of sameTree(left) and sameTree(right).
@@ -1522,7 +1971,38 @@ def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
     
     return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
 ```
+## 59. Longest Palindromic Substring
 
+Similar to number of palindromic substrings, you simply find every palindromic substring and update the max value when you find a longer one and save the string through slicing.
+
+- Time O(n^2)
+- Space O(1)
+
+```py
+def longestPalindrome(self, s: str) -> str:
+    longest = 0
+    ans = ""
+    for i in range(len(s)*2):
+
+        mid = i/2
+
+        l = int(mid)
+        r = round(mid + 0.001)
+
+        while l >= 0 and r < len(s):
+
+            if s[l] != s[r]:
+                break
+            
+            
+            if r-l+1 > longest:
+                ans = s[l:r+1]
+                longest = r-l+1
+            l -= 1
+            r += 1
+
+    return ans
+```
 ## 60. Maximum Depth of Binary Search Tree
 
 Do a dfs and count the depth.
@@ -1543,4 +2023,101 @@ def dfs(self, root, count):
 def maxDepth(self, root: Optional[TreeNode]) -> int: 
     return self.dfs(root, 0)
 ```
-  
+
+## 61. Sum of Two Integers
+
+Call me a hack, I don't care. Python integers are simple at the front, a nightmare at the back. I doubt this question was indended to demonstrate the black magic that is pythonic typing, so I will convert it to a more intutive datatype. This solution is identical to ones you would see for java or C. 
+
+Take the XOR to get the addition of the two numbers and a bitwise shift of the AND to get the carry. Add these together until the carry is 0 and return the sum.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def getSum(a: int, b: int) -> int:
+    
+    a = np.int64(a)
+    b = np.int64(b)
+
+    while b:
+        xor = a ^ b
+        car = (a & b) << 1
+
+        a = xor
+        b = car
+
+    return a
+```
+## 62. House Robber
+
+Use dynamic programming. Use i and j to store a window of max values. For a number, n, the new max will be the max of i + n and j. Move the window.
+
+- Time O(n)
+- Space O(1)
+
+```py
+def rob(self, nums: List[int]) -> int:
+    
+    i, j = 0, 0
+
+    for n in range(len(nums)):
+        tmp = j
+        j = max(j, i + nums[n])
+        i = tmp
+
+    return j
+```
+
+## 63. House Robber II
+
+Simply use solution from House Robber and evaluate twice. Since houses 0 and -1 can't both be robbed, we can find the solutions for all the houses except each one of them and get the max. 
+
+- Time O(n)
+- Soace O(1)
+
+```py
+def rob(self, nums: List[int]) -> int:
+    if len(nums) < 3:
+        return max(nums)
+
+    # from 0 to -1
+    i, j = 0, 0
+    for n in range(len(nums)-1):
+        tmp = j
+        j = max(j, i + nums[n])
+        i = tmp
+
+    A = j
+    
+    # from 1 to len(nums)
+    i, j = 0, 0
+    for n in range(1,len(nums)):
+        tmp = j
+        j = max(j, i + nums[n])
+        i = tmp
+    
+    B = j
+
+    return max(A, B)
+```
+
+## 65. Contains Duplicate
+
+Iterate through the string and keep a set of the numbers encountered. If a number is seen twice return True, else return False.
+
+- Time O(n)
+- Space O(n)
+
+```py
+def containsDuplicate(self, nums: List[int]) -> bool:
+    seen = set()
+
+    for n in nums:
+        if n in seen:
+            return True
+        seen.add(n)
+    return False
+``` 
+
+Alternatively cast the list to a set and compare the lengths of the set and the original list.
+
