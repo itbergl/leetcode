@@ -1176,13 +1176,10 @@ And to reduce memory usage, have a sliding window of size two.
 ```py
 def numDecodings(self, s: str) -> int:
     
-    
     if int(s[0]) == 0:
         return 0
     
     dp = (1,1)
-    
-    
     
     for i, c in enumerate(s[1:], 1):
         
@@ -1190,8 +1187,7 @@ def numDecodings(self, s: str) -> int:
         n = 0
         if one != 0:
             n += dp[1] 
-        
-        
+         
         two = int(s[i-1:i+1])
 
         if two < 27 and two >= 10:
@@ -1490,7 +1486,6 @@ Keep a left and right pointer, and increment the limiting one (smaller one) towa
 def maxArea(self, height: List[int]) -> int:
     
     l, r = 0, len(height)-1
-    
     ret = -1
     
     while l < r:
@@ -1893,6 +1888,58 @@ def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
     return [_ for _ in groups.values()]
 ```
 
+## 55. Longest Increasing Subsequence
+
+### O(n^2)
+
+Using DP, keep at each corresponding index the length of the LIS. Iterate through each earlier solution and add one to it if the corresponding number is smaller. Update the new solution in the DP array and the best solution.
+
+- Time O(n^2)
+- Space O(n)
+  
+```py
+def lengthOfLIS(self, nums: List[int]) -> int:
+
+    LIS = [1]
+    best = 1
+    for j, n_j in enumerate(nums[1:], 1):
+        
+        LIS_prop = 1
+        for i, n_i in enumerate(LIS):
+            if n_i + 1 > LIS_prop and nums[i] < n_j:
+                LIS_prop = max(LIS_prop, n_i+1)
+            
+        LIS.append(LIS_prop)
+        best = max(best, LIS_prop)
+    
+    return best
+```
+
+### O(nlogn)
+
+Keep a list of the LIS (sort of). If a number is larger than the maximum we can add it. If it is smaller than the maximum we can change the next largest element from the number to that number. 
+
+- Time O(nlogn)
+- Space O(n)
+
+```py
+def lengthOfLIS(self, nums: List[int]) -> int:
+
+    LIS = []
+
+    for n in nums:
+
+        if not LIS or LIS[-1] < n:
+            LIS.append(n)
+            continue
+        
+        i = bisect_left(LIS, n)
+        LIS[i] = n
+    
+    return len(LIS)
+```
+
+
 ## 56. Palindromic Substrings
 
 Step through the indexes of the input in steps of 0.5, and get the left and right elements either side and keep adding to the total until they aren't equal.
@@ -2100,7 +2147,37 @@ def rob(self, nums: List[int]) -> int:
 
     return max(A, B)
 ```
+## 64. Validate Binary Search Tree
 
+Create a recursive function that finds the min and max values for both its left and right children. Return None if the min or max values conflict with the root value, or if the children are invalid themselves (returns None).
+
+- Time O(n)
+- Space O(n)
+
+```py
+def recursive(self, root):
+
+    L = (root.val, root.val-1)
+    if root.left:
+        L = self.recursive(root.left)
+        if not L:
+            return None
+    
+    R = (root.val+1, root.val)
+    if root.right:
+        R = self.recursive(root.right)
+        if not R:
+            return None
+    
+    if L[1] < root.val < R[0]:
+        return (L[0], R[1])
+
+    return None
+    
+def isValidBST(self, root: Optional[TreeNode]) -> bool:
+    
+    return self.recursive(root) is not None
+```
 ## 65. Contains Duplicate
 
 Iterate through the string and keep a set of the numbers encountered. If a number is seen twice return True, else return False.
@@ -2121,3 +2198,122 @@ def containsDuplicate(self, nums: List[int]) -> bool:
 
 Alternatively cast the list to a set and compare the lengths of the set and the original list.
 
+## 66. Find Minimum in Rotated Sorted Array
+
+Do a binary search with special conditions. If the first element is bigger than the middle element then the smallest element will be in the left (but not the necessarily first element) - middle element included. If the last element is smaller than the middle element, then the smallest element will be in the right (but not necessarily in the middle element). If the element is in the left, search it (including the middle), and if it is in the right search it (excluding the middle). If it is in both, or it is in neither, then it must be the the first or middle element, so return the smallest.
+
+- Time O(logn)
+- Space O(1)
+
+```py
+def findMin(self, nums: List[int]) -> int:
+    i, j = 0, len(nums)-1
+
+    while i <= j:
+        mid = (i+j)//2
+
+        in_left = nums[i] > nums[mid]
+        in_right = nums[mid] > nums[j] 
+            
+        if not (in_left ^ in_right):
+            return min(nums[i], nums[mid])
+
+        if in_left:
+            j = mid 
+            continue
+        
+        if in_right:
+            i = mid + 1
+            continue
+```
+
+## 67. Number of 1 Bits
+
+Nothing fancy. Keep bitwise shifting right and ANDing with 1 to get either 1 or 0. If 1, increase the total.
+
+- Time O(1) (for fixed length integers), O(log(n)) for infinite length
+- space O(1)
+  
+```py
+def hammingWeight(self, n: int) -> int:
+    
+    total = 0
+
+    while n:
+        if n & 1:
+            total += 1
+        n >>=  1
+    
+    return total
+```
+
+## 68. Serialize and Deserialize Binary Tree
+
+Nothing fancy. Do a BFS using a queue, and append every element (and null childs) to a comma separated string, with wildcards for null elements. 
+
+To deserialise, do a BFS and create new leaf nodes as needed according to the encoded string. 
+
+### Encoder
+
+- Time O(n)
+- Space O(n)
+  
+### Decoder
+
+- Time O(n)
+- Space O(n)
+
+```py
+def serialize(self, root):
+
+    if not root:
+        return ''
+
+    s = ''
+
+    queue = deque()
+    queue.append(root)
+
+    while queue:
+        p = queue.popleft()
+
+        if not p:
+            s = s + '.,'
+            continue
+        
+        s = s + str(p.val) + ','
+        
+        queue.append(p.left)
+        queue.append(p.right)
+
+    return s
+    
+def deserialize(self, data):
+
+    if not data:
+        return None
+
+    stack = deque()
+    stack.extend(data.split(','))
+
+    v = stack.popleft()
+    ref = TreeNode(int(v))
+
+    queue = deque()
+    queue.append(ref)
+    
+    while queue:
+        p = queue.popleft()
+
+        l = stack.popleft()
+        if l != '.':
+            p.left = TreeNode(int(l))
+            queue.append(p.left)
+        
+        r = stack.popleft()
+        if r != '.':
+            p.right = TreeNode(int(r))
+            queue.append(p.right)
+    
+    return ref
+```
