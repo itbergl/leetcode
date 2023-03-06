@@ -8,6 +8,9 @@ parentheses.
 - Time - O(n)
 - Space - O(n) (using stacks)
 
+<details>
+    #<summary>Python</summary>
+
 ```py
 def isValid(self, s: str) -> bool:  
 
@@ -33,12 +36,45 @@ def isValid(self, s: str) -> bool:
 
     return len(stack) == 0
 ```
+</details>
+<details>
+    <summary>Java</summary>
+
+```java
+class Solution {
+    public boolean isValid(String s) {
+
+        HashMap opening = new HashMap<String, String>();
+        opening.put(')', '(');
+        opening.put('}', '{');
+        opening.put(']', '[');
+        
+        Stack<Character> stack = new Stack<>();
+
+        for (char c : s.toCharArray()) {
+
+            if (opening.containsKey(c) && !stack.isEmpty()) {
+                if (opening.get(c) != stack.pop()) return false;
+                
+            }
+            else stack.push(c);
+        }
+
+        return stack.isEmpty();
+
+    }
+}
+```
+</details>
 
 ## 2. Spiral Matrix
 
 Use a direction vector that will rotate clockwise (y,x) -> (x,-y) when it is out of bounds or it will visit a marked cell. When the return array has enough elements, return the result.
 - Time O(n*m)
 - Space O(n*m)
+- 
+<details>
+    <summary>Python</summary>
 
 ```py
 def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
@@ -73,6 +109,45 @@ def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
         
     return ret
 ```
+</details>
+
+<details>
+    <summary>Java</summary>
+
+```java
+public List<Integer> spiralOrder(int[][] matrix) {
+
+    int h = matrix.length, w = matrix[0].length;
+    int v_x = 1, v_y = 0, p_x = 0, p_y = 0;
+
+    ArrayList<Integer> flattened = new ArrayList<Integer>();
+    int I = 0;
+    while (flattened.size() < h*w) {
+        flattened.add(matrix[p_y][p_x]);
+
+        int dp_x = p_x + v_x;
+        int dp_y = p_y + v_y;
+
+        if (dp_x == I && dp_y == I) {
+            I++;
+        }
+
+        if (dp_x < I || dp_x >= w-I || dp_y < I || dp_y >= h-I) {
+            int temp = v_y;
+            v_y = v_x;
+            v_x = -temp;
+        } 
+        
+        p_x += v_x;
+        p_y += v_y;
+
+    }
+
+    return flattened;
+
+}
+```
+</details>
 
 ## 3. Valid Anagram
 
@@ -100,6 +175,19 @@ def isAnagram(self, s: str, t: str) -> bool:
             return False
         
     return True
+```
+
+```java
+public boolean isAnagram(String s, String t) {
+    
+    char[] s_arr = s.toCharArray();
+    char[] t_arr = t.toCharArray();
+    Arrays.sort(s_arr);
+    Arrays.sort(t_arr);
+    s = new String(s_arr);
+    t = new String(t_arr);
+    return s.equals(t);
+}
 ```
 
 ## 4. Set Matrix Zeroes
@@ -135,6 +223,36 @@ def setZeroes(self, matrix: List[List[int]]) -> None:
     return matrix
 ```
 
+```java
+public void setZeroes(int[][] matrix) {
+    
+
+    Set<Integer> cols = new HashSet<Integer>();
+    Set<Integer> rows = new HashSet<Integer>();
+
+    for (int j = 0; j < matrix.length; j++) {
+
+        for (int i = 0; i < matrix[0].length; i++) {
+
+            if (matrix[j][i] == 0) {
+                cols.add(i);
+                rows.add(j);
+            } 
+        }
+    }
+
+    for (Integer col: cols) {
+        for (int i = 0; i < matrix.length; i++) {
+            matrix[i][col] = 0;
+        }
+    }
+    for (Integer row: rows) {
+        matrix[row] = new int[matrix[0].length];
+    }     
+
+}
+```
+
 ## 5. Lowest Common Anscestor of BST
 
 Do a binary search on the BST until you find a value that is between smallest number and largest number. Keep iterating, aiming for not a value but the range.
@@ -162,6 +280,13 @@ def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -
     return self.dfs(root, min(p.val,q.val), max(p.val, q.val))
 ```
 
+```java
+public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) { 
+    if (root.val > p.val && root.val > q.val) return lowestCommonAncestor(root.left, p, q);
+    if (root.val < p.val && root.val < q.val) return lowestCommonAncestor(root.right, p, q);
+    return root;
+}
+```
 ## 6. Construct Binary Tree From preorder and inorder traversal
 
 Recursively pop leftmost element from preorder, as we know that will be the topmost head. Find the index in inorder of the popped element (optimised as a hashmap). We can split the inorder into a left tree (before index) and a right tree (after index). If there are elements in the left tree, they will appear before the right children in the preorder list so we can pop from the left again and use the left subtree recursively. 
@@ -196,6 +321,30 @@ def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNod
     return root
 ```
 
+```java
+public TreeNode buildTree(int[] preorder, int[] inorder) {
+    
+    HashMap<Integer, Integer> indexOf = new HashMap<Integer, Integer>();
+    for (int i = 0; i < inorder.length; i++) indexOf.put(inorder[i], i);
+
+    return buildTreeResursive(preorder, new int[] {0}, inorder, 0, inorder.length, indexOf);
+}
+
+public TreeNode buildTreeResursive(int[] preorder, int[] pre, int[] inorder, int inI, int inJ, HashMap<Integer, Integer> map) {
+    
+    if (inI == inJ || pre[0] == preorder.length) return null;
+    
+    TreeNode head = new TreeNode(preorder[pre[0]]);
+    int i = map.get(head.val);
+
+    pre[0] += 1;
+    head.left = buildTreeResursive(preorder, pre, inorder, inI, i, map);
+    head.right = buildTreeResursive(preorder, pre, inorder, i+1, inJ, map);
+
+    return head;
+}
+```
+
 ## 7. Counting Bits
 
 To do in nlogn time, we could either keep a complicated datastructure that keeps track of each power of two column, or decompose each element into its powers of two. To do in O(n) time in a single pass we can find our largest power of two found so far, knowing the solution is 1 for this number, and finding the difference between the subsequent numbers. This difference will already be cached so we can simply add the solutions. We know that the subsequent numbers are equal to the previous numbers but with an additional 1 at the front so we can just append the differnce that is already cached + 1.
@@ -222,6 +371,25 @@ def countBits(self, n: int) -> List[int]:
         
 ```
 
+```java
+public int[] countBits(int n) {
+    
+    int[] ans = new int[n+1];
+    int maxPower = 1;
+
+    for (int b = 1; b <= n; b++) {
+        
+        if (b == 2*maxPower) {
+            maxPower = b;
+            ans[b] = 1;
+            continue;
+        }
+        ans[b] = 1 + ans[b-maxPower];
+    }
+    return ans;
+}
+```
+
 ## 8. Two Sum
 
 Keep a list of elements that we need to find, when we come across a number. For example if the target is 5 and we find 3, store 2 and the index. If our element is not beening looked for add its pair to the list and continue.
@@ -239,6 +407,22 @@ def twoSum(self, nums: List[int], target: int) -> List[int]:
         seen[n] = i
     
     return
+```
+
+```java
+public int[] twoSum(int[] nums, int target) {
+
+    Map hm = new HashMap<Integer, Integer>();
+    for(int i=0; i < nums.length; i ++) {
+
+        if (hm.containsKey(target - nums[i])) {
+            return new int[] {i, (int)hm.get(target-nums[i])};
+        }
+        hm.put(nums[i],i);
+    }
+    // never executed
+    return new int[] {-1, -1};
+}
 ```
 
 ## 9. Non-overlapping Intervals
@@ -266,6 +450,26 @@ def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
     return len(intervals)-count
 ```
 
+```java
+public int eraseOverlapIntervals(int[][] intervals) {
+    
+    Arrays.sort(intervals, Comparator.comparingInt(o -> o[1]));
+
+    int currOverlapping =  intervals[0][0];
+    int count = 0;
+    for (int i = 0; i < intervals.length; i ++) {
+        
+        if (intervals[i][0] >= currOverlapping) {
+            currOverlapping = intervals[i][1];
+            count++;
+        }
+    }
+
+    return intervals.length - count;
+
+}
+```
+
 ## 10. Best Time to buy and sell stock
 
 My solution is as follows: iterate through the array forward, keeping track of the smallest value seen so far, and at each stage calculating the profit and updating max profit appropriately.
@@ -282,6 +486,24 @@ def maxProfit(self, prices: List[int]) -> int:
         ans = max(p - lowest_so_far, ans)
         
     return ans
+```
+```java
+public int maxProfit(int[] prices) {
+    
+    int max_profit = 0, buy_index = 0;
+
+    for (int s = 0; s < prices.length; s++) {
+        
+        if (prices[s] < prices[buy_index]) {
+            buy_index = s;
+            continue;
+        }
+        max_profit = Math.max(max_profit, prices[s]-prices[buy_index]);
+    }
+
+    return max_profit;
+
+    }
 ```
 
 While I think my solution is more readable, there are some unessessary comparisons. For example, we are always checking min value seen when really we shouldn't have to. 
@@ -305,6 +527,7 @@ def maxProfit(self,prices):
     return max_profit
 ```
 
+
 ## 11. Climbing Stairs
 
 With DP, we can build an array of size n where the ith entry is the solution for n=i. To find the solution for n=n+2, we can add n and n+1 as there is one way to get to n+2 from n and one way from n+1 in one step. A further optimisation is that we only care about the last two elements so we can just use a sliding window of size 2.
@@ -326,10 +549,26 @@ def climbStairs(self, n: int) -> int:
     
     return window[1]
 ```
+```java
+public int climbStairs(int n) {
+    
+    if (n == 1) return 1;
+    int[] window = {1, 2};
+    for (int i = 0; i < n-2; i++) {
+        
+        window[1] = window[0] + window[1];
+        window[0] = window[1] - window[0];
+
+    }
+
+    return window[1];
+
+}
+```
 
 ## 12. Binary Tree Level Order Traversal
 
-I had originally tried to be too clever and put a hashmap where it had no buisiness being. I knew to do a BFS as this is exactly a level order traversal. I had a hashmap of levels to elements, with the queue of the BFS including an incremented level variable as a two tuple with the node. Then I used a list comprehension to append these lists. This was very slow (beat 5% by time).
+I had originally tried to be too clever and put a hashmap where it had no business being. I knew to do a BFS as this is exactly a level order traversal. I had a hashmap of levels to elements, with the queue of the BFS including an incremented level variable as a two tuple with the node. Then I used a list comprehension to append these lists. This was very slow (beat 5% by time).
 
 Instead I built the return list as I went. I kept the idea of attaching level variable to each queue element. Now I just append to the last element unless there is a new level.
 
@@ -361,6 +600,46 @@ def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
             queue.append((n.right, l+1))
     
     return levels
+```
+
+```java
+    public List<List<Integer>> levelOrder(TreeNode root) {
+
+        
+        Queue<TreeNode> queue = new LinkedList<TreeNode>();
+        Queue<Integer> level = new LinkedList<Integer>();
+
+        List<List<Integer>> ret =  new ArrayList<List<Integer>>();
+
+        if (root == null) return ret;
+        
+        queue.add(root);
+        
+        int L = 0;
+        level.add(L);
+
+        while (!queue.isEmpty()) {
+
+            TreeNode node = queue.remove();
+            int lev = level.remove();
+
+            if (ret.size() == lev) ret.add(new ArrayList<Integer>());
+
+            ret.get(lev).add(node.val);
+
+            if (node.left != null) {
+                queue.add(node.left);
+                level.add(lev + 1);
+            }
+            if (node.right != null){
+                queue.add(node.right);
+                level.add(lev + 1);
+            } 
+        }
+        
+        return ret;
+        
+    }
 ```
 
 ## 13. Pacific Atlantic Water Flow
